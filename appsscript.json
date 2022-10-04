@@ -1,0 +1,16 @@
+{
+  "timeZone": "Pacific/Pago_Pago",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "dataStudio": {
+    "name": "Jira issues connector",
+    "logoUrl": "https://wac-cdn-2.atlassian.com/image/upload/f_auto,q_auto/dam/jcr:616e6748-ad8c-48d9-ae93-e49019ed5259/Atlassian-horizontal-blue-rgb.svg?cdnVersion=557",
+    "company": "Google Data Studio Developer Relations",
+    "companyUrl": "https://developers.google.com/datastudio/",
+    "addonUrl": "https://github.com/clarikagroup/jira_connector_for_google_data_studio/README.md",
+    "supportUrl": "https://github.com/clarikagroup/jira_connector_for_google_data_studio",
+    "description": "This connector queries for issues in Jira",
+    "sources": ["JIRA"],
+    "shortDescription": "Query track popularity statistics by issues in Jira software."
+  }
+}
