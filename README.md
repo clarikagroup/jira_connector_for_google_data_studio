@@ -44,11 +44,17 @@ complete the connector setup:
 ### About connector files
 
 **appsscript.json** -> json file with general info about this connector
+
 **main.gs** -> script that implement methods from data studio connector interfaz
+
 **auth.gs** -> script that implement methods to authentication user
+
 **config.gs** -> script that implement methods to configuration of connector
+
 **schema.gs** -> script that describe data schema of connector
+
 **data.gs** -> script that contains functions for data acquisition from the jira api
+
 **support.gs** -> general purpose functions
 
 
