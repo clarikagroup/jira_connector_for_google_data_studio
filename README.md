@@ -41,19 +41,19 @@ complete the connector setup:
     `SPRINT_CUSTOM_ATTR` | {NAME OF CUSTOM ATTRIBUTE IN YOUR WORK DOMAIN FOR SPRINT INFO} (customfield_xxxx)
     `STORYPOINTS_CUSTOM_ATTR` | {NAME OF CUSTOM ATTRIBUTE IN YOUR WORK DOMAIN FOR STORY POINTS} (customfield_xxxx)
 
-### About connector files
+### 3. About connector files
 
 **appsscript.json** -> json file with general info about this connector
 
-**main.gs** -> script that implement methods from data studio connector interfaz
+**main.gs** -> implement methods from data studio connector interfaz
 
-**auth.gs** -> script that implement methods to authentication user
+**auth.gs** -> authentication user
 
-**config.gs** -> script that implement methods to configuration of connector
+**config.gs** -> configuration of connector
 
-**schema.gs** -> script that describe data schema of connector
+**schema.gs** -> data schema
 
-**data.gs** -> script that contains functions for data acquisition from the jira api
+**data.gs** -> functions for data acquisition from the jira api
 
 **support.gs** -> general purpose functions
 
