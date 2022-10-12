@@ -1,9 +1,6 @@
 function createSchema(request) {
-  if (createQueryParamsFromConfig(request)) {
-    const fields = getFields(request).build();
-    return { schema: fields };
-  }
-  return { schema: undefined };
+  createParamsFromConfig(request); 
+  return { schema: getFields(request).build() };  
 }
 
 function getFields(request) {
@@ -194,5 +191,6 @@ function getFields(request) {
   
    return fields;
 }
+
 
 

@@ -51,23 +51,19 @@ function addToStringArray(arr, item)
     arr.push(item);    
 }
 
-function setGlobalVars() {  
-  const scriptProps = PropertiesService.getScriptProperties();
+function setGlobalVars() {
+  const scriptProps = PropertiesService.getScriptProperties();  
   const domain  = scriptProps.getProperty('DEFAULT_DOMAIN').toLowerCase();  
-  const formatDate  = scriptProps.getProperty('FORMAT_DATE').toLowerCase(); 
-  const sprintAttr  = scriptProps.getProperty('SPRINT_CUSTOM_ATTR').toLowerCase(); 
-  const storyPAttr  = scriptProps.getProperty('STORYPOINTS_CUSTOM_ATTR').toLowerCase(); 
-  const lang  = scriptProps.getProperty('LANG');
+  const formatDate  = scriptProps.getProperty('FORMAT_DATE').toLowerCase();   
+  const lang  = scriptProps.getProperty('LANG');       
   
   globalThis.globalVar = {};
-  globalVar.domain = domain;
-  globalVar.sprint = sprintAttr;
-  globalVar.storyPoints = storyPAttr;
+  globalVar.domain = domain;  
   globalVar.urlBase = 'https://' + domain + '.atlassian.net/rest/api/3/';
   globalVar.urlBaseAgile = 'https://' + domain + '.atlassian.net/rest/agile/1.0/';  
   globalVar.lang = lang;
-  globalVar.date = {};
-  globalVar.date.format = {year: "numeric", month: "2-digit", day: "2-digit"};
-  globalVar.date.input = formatDate; 
+  globalVar.date = {format: {year: "numeric", month: "2-digit", day: "2-digit"}, input: formatDate};   
   globalVar.httpHeaders = undefined;
+  globalVar.params = undefined;
 }
+

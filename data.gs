@@ -1,20 +1,21 @@
-function createData(request) {  
-  //get config parameters
-  const params = createQueryParamsFromConfig(request);      
-  //get token from input user
+function createData(request) {
+  createParamsFromConfig(request); 
+  //get token from input user.
   const token = loadCurrentUser();
-  //get jql sentence with params filters
-  const jql = getJQL(params);  
+  //get jql sentence with params filters.
+  const jql = getJQL();    
+  //get custom attributes from domain.
+  const customAttrs = getCustomAttributes(token, jql);       
+  //get issues.
+  const issues = getIssues(token, jql, customAttrs);
   //create response with connector format required.
   const fields = this.getFields(); 
   const fieldIds = request.fields.map(function(field) {
     return field.name;
-  });       
-  //get issues.
-  const issues = getIssues(token, jql);
+  });
   const requestedSchema = fields.forIds(fieldIds);    
   //transform response.
-  const requestedData = transform(token, requestedSchema, issues);      
+  const requestedData = transform(token, requestedSchema, issues, customAttrs);      
   
   return {
     schema: requestedSchema.build(),
@@ -26,7 +27,7 @@ function createData(request) {
 * transform list of issues in the response with connector format
 * @return {array}.
 */
-function transform(token, requestedSchema, issues) {
+function transform(token, requestedSchema, issues, cAttrs) {
   const schema = requestedSchema.asArray();
   var issuesInBackLog = undefined;
   var releases = [];  
@@ -34,10 +35,10 @@ function transform(token, requestedSchema, issues) {
   const data = issues.map(function(issue) {
     const histories = issue.changelog.histories? issue.changelog.histories: [];        
     const fields = issue.versionedRepresentations;            
-    const sprints = fields[globalVar.sprint]? fields[globalVar.sprint].firstProp(): [];        
+    const sprints = cAttrs.sprint && fields[cAttrs.sprint]? fields[cAttrs.sprint].firstProp(): [];        
     const project = fields.project? fields.project.firstProp(): undefined;           
     const lastAssigneeUser = fields.assignee? fields.assignee.firstProp()? fields.assignee.firstProp().displayName: '': '';    
-    const storyPoints = fields[globalVar.storyPoints]? fields[globalVar.storyPoints].firstProp(): 0;     
+    const points = cAttrs.storyPoints && fields[cAttrs.storyPoints]? fields[cAttrs.storyPoints].firstProp(): 0;     
     const assigneeUsers = getAssigneeUsers(histories);    
     const sprint = getSprint(sprints);       
     const values = [];        
@@ -80,7 +81,7 @@ function transform(token, requestedSchema, issues) {
           values.push(issue.backlog);
           break;
         case 'storyPoints':
-          values.push(storyPoints);
+          values.push(points);
           break;
         case 'lastAssignee':    
           values.push(lastAssigneeUser);          
@@ -173,7 +174,8 @@ function transform(token, requestedSchema, issues) {
 * Get JQL sentece, filter for created an project attributes from issue
 * @return {array}.
 */
-function getJQL(params) {
+function getJQL() {
+  const params = globalVar.params;
   const dateEnd = new Date(params.dateEnd.getFullYear(), params.dateEnd.getMonth(), params.dateEnd.getDate() + 1);      
   const dateStart = params.dateStart;
   const projects = params.projects;
@@ -196,7 +198,45 @@ function getJQL(params) {
 * Get list of issues
 * @return {array}.
 */
-function getIssues(token, jql, offset) {  
+function getCustomAttributes(token, jql) {    
+  const rawResponse = UrlFetchApp.fetch(globalVar.urlBase + 'search', {
+      method: 'POST',      
+      headers: {'Authorization': 'Basic ' + token, 'Content-Type': 'application/json'},
+      muteHttpExceptions: true,                          
+      payload: JSON.stringify({
+        "expand": ["names"],
+        "jql": jql,
+        "maxResults": 1,
+        "fieldsByKeys": false,        
+        "fields": [],
+        "startAt": 0})                                      
+  });
+  const httpCode = rawResponse.getResponseCode();    
+  const result = {};
+
+  if (httpCode === 200) {       
+    const res = JSON.parse(rawResponse);  
+    const names = res.names;       
+    for (prop in names) {
+      const value = names[prop].toString().toLowerCase();
+      switch(value) {
+        case "sprint":
+          result.sprint = prop;
+          break;
+        case "story points":
+          result.storyPoints = prop;
+          break;        
+      }
+    }    
+  }  
+  return result; 
+}
+
+/**
+* Get list of issues
+* @return {array}.
+*/
+function getIssues(token, jql, cAttrs, offset) {  
   const startAt = (offset)? offset: 0;  
   const rawResponse = UrlFetchApp.fetch(globalVar.urlBase + 'search', {
       method: 'POST',      
@@ -207,7 +247,7 @@ function getIssues(token, jql, offset) {
         "jql": jql,
         "maxResults": 5000,
         "fieldsByKeys": false,        
-        "fields": [globalVar.sprint, globalVar.storyPoints, "status", "summary", "assignee", "project", "issuetype", "resolutiondate", "created", "priority"],
+        "fields": [cAttrs.sprint, cAttrs.storyPoints, "status", "summary", "assignee", "project", "issuetype", "resolutiondate", "created", "priority"],
         "startAt": startAt})                                      
   });
   const httpCode = rawResponse.getResponseCode();    
@@ -219,7 +259,7 @@ function getIssues(token, jql, offset) {
     
     if (readedAt < (res.total - 1)) {
       //the answer is paginated
-      const next = getIssues(token, jql, readedAt + 1);      
+      const next = getIssues(token, jql, cAttrs, readedAt + 1);      
       return issues.concat(next);
     }    
     return issues;

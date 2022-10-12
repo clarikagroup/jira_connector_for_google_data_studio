@@ -2,15 +2,21 @@
   "timeZone": "Pacific/Pago_Pago",
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
+  "urlFetchWhitelist": ["https://*.atlassian.net/rest/api/3/project",
+                        "https://*.atlassian.net/rest/api/3/search",
+                        "https://*.atlassian.net/rest/api/3/myself",
+                        "https://*.atlassian.net/rest/agile/1.0/board"],
   "dataStudio": {
     "name": "Jira issues connector",
-    "logoUrl": "https://wac-cdn-2.atlassian.com/image/upload/f_auto,q_auto/dam/jcr:616e6748-ad8c-48d9-ae93-e49019ed5259/Atlassian-horizontal-blue-rgb.svg?cdnVersion=557",
-    "company": "Google Data Studio Developer Relations",
+    "logoUrl": "https://clarikagroup.com/wp-content/themes/ed-theme-child/assets/images/logo/logo-rounded.png",
+    "company": "Clarika",
     "companyUrl": "https://developers.google.com/datastudio/",
     "addonUrl": "https://github.com/clarikagroup/jira_connector_for_google_data_studio/blob/dev/README.md",
     "supportUrl": "https://github.com/clarikagroup/jira_connector_for_google_data_studio",
-    "description": "This connector queries for issues in Jira",
+    "authType": ["USER_TOKEN"],
+    "feeType": ["FREE"],
+    "description": "This connector queries issues in Jira. You can use the filters by project and date range to refine queries",
     "sources": ["JIRA"],
-    "shortDescription": "Query track popularity statistics by issues in Jira software."
+    "shortDescription": "Query data from issues in Jira software."    
   }
 }

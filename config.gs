@@ -3,9 +3,8 @@ function createConfig() {
   const config = cc.getConfig();
   const projects = getProjects(); 
   const today = new Date();      
-  const first = new Date(today.getFullYear(),0,1);      
-  var multiple; 
-  
+  const first = new Date(today.getFullYear(),0,1);  
+
   config.newInfo()
   .setId('domain')
   .setText('Default domain is ' + globalVar.domain.toUpperCase());
@@ -27,8 +26,8 @@ function createConfig() {
   .setHelpText(globalVar.date.input)
   .setPlaceholder(today.toLocaleDateString(globalVar.lang, globalVar.date.format))
   .setAllowOverride(false);
-  
-  multiple = config.newSelectMultiple()
+
+  const multiple = config.newSelectMultiple()
   .setId("projects")
   .setName("Projects")
   .setHelpText("Select projects you're interested in")  
@@ -65,11 +64,11 @@ function getProjects() {
 * Validate config parameteres.
 * @return {object} valid input parameters
 */
-function createQueryParamsFromConfig(request) {  
-  if (request.configParams) {
+function createParamsFromConfig(request) {  
+  if (request.configParams) {    
     const projects = request.configParams.projects? request.configParams.projects: "";
     
-    if (projects && projects.length > 0) {                           
+    if (projects && projects.length > 0){                           
       const today = new Date();        
       var dateStart;
       var dateEnd;
@@ -97,9 +96,11 @@ function createQueryParamsFromConfig(request) {
       } else if (diffDays > 730) {
         throw ("Range of dates is greater than 730 days");              
       }
-      return {projects: projects, dateStart: dateStart, dateEnd: dateEnd};
-    }
-  }
-  throw ("Project is required");    
-  return undefined;    
+      const params = {"projects": projects, "dateStart": dateStart, "dateEnd": dateEnd};
+      globalVar.params = params;   
+     
+      return;    
+    } 
+  }  
+  throw ("projects are required");
 }

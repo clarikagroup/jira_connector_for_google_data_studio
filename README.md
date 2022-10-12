@@ -24,7 +24,7 @@ step.
 The connector require authentication token. Follow the steps below to
 complete the connector setup:
 
-1.  Visit the https://[your-domain].atlassian.net/jira/your-work.
+1.  Visit the https://<your-domain>.atlassian.net/jira/your-work.
 2.  In your Jira account, select the account management option. 
     Then, in the security menu select the option **Create and manage API tokens**.
 
@@ -37,25 +37,31 @@ complete the connector setup:
    ----------------------|----------------------
     `DEFAULT_DOMAIN`     | {YOUR WORK DOMAIN} 
     `FORMAT_DATE`        | {SHORT FORMAT DATE} (dd/mm/yyy, yyyy/mm/dd, yyyy.mm.dd, etc.)    
-    `LANG`               | {LANGUAGE} (es-AR, en-US, etc.)
-    `SPRINT_CUSTOM_ATTR` | {NAME OF CUSTOM ATTRIBUTE IN YOUR WORK DOMAIN FOR SPRINT INFO} (customfield_xxxx)
-    `STORYPOINTS_CUSTOM_ATTR` | {NAME OF CUSTOM ATTRIBUTE IN YOUR WORK DOMAIN FOR STORY POINTS} (customfield_xxxx)
+    `LANG`               | {LANGUAGE} (es-AR, en-US, etc.)    
 
-### 3. About connector files
+### About connector files
 
 **appsscript.json** -> json file with general info about this connector
-
-**main.gs** -> implement methods from data studio connector interfaz
-
-**auth.gs** -> authentication user
-
-**config.gs** -> configuration of connector
-
-**schema.gs** -> data schema
-
-**data.gs** -> functions for data acquisition from the jira api
-
+**main.gs** -> script that implement methods from data studio connector interfaz
+**auth.gs** -> script that implement methods to authentication user
+**config.gs** -> script that implement methods to configuration of connector
+**schema.gs** -> script that describe data schema of connector
+**data.gs** -> script that contains functions for data acquisition from the jira api
 **support.gs** -> general purpose functions
+
+### Functions created in data studio with the connector data
+
+deviation in days:
+  DATE_DIFF(Sprint Complete,Sprint End)
+Percentage of completion:
+  AVG(Story Points/Puntos Finalizados)
+Finished points:
+  if(State="UAT",Story Points,0)
+  IF(State='Finalizada'and Extend= False,Story Points,0)
+Days without release:
+  DATE_DIFF(TODAY(),Project Release Date)
+Days without time registration:
+  DATE_DIFF(TODAY(),Tempo Date)
 
 
 
