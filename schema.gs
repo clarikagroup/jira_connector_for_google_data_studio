@@ -1,5 +1,6 @@
 function createSchema(request) {
-  createParamsFromConfig(request); 
+  setGlobalParams();
+  validateParamsFromConfig(request);
   return { schema: getFields(request).build() };  
 }
 

@@ -15,7 +15,7 @@ String.prototype.replaceAll = function (find, replace) {
 String.prototype.toDate = function(format)
 {
   const normalized       = this.replace(/[^a-zA-Z0-9]/g, '-');
-  const normalizedFormat = format.toString().toLowerCase().replace(/[^a-zA-Z0-9]/g, '-');
+  const normalizedFormat = format.toString().replace(/[^a-zA-Z0-9]/g, '-');
   const formatItems      = normalizedFormat.split('-');
   const dateItems        = normalized.split('-');
   const monthIndex  = formatItems.indexOf("mm");
@@ -51,19 +51,25 @@ function addToStringArray(arr, item)
     arr.push(item);    
 }
 
-function setGlobalVars() {
-  const scriptProps = PropertiesService.getScriptProperties();  
-  const domain  = scriptProps.getProperty('DEFAULT_DOMAIN').toLowerCase();  
-  const formatDate  = scriptProps.getProperty('FORMAT_DATE').toLowerCase();   
-  const lang  = scriptProps.getProperty('LANG');       
-  
-  globalThis.globalVar = {};
-  globalVar.domain = domain;  
-  globalVar.urlBase = 'https://' + domain + '.atlassian.net/rest/api/3/';
-  globalVar.urlBaseAgile = 'https://' + domain + '.atlassian.net/rest/agile/1.0/';  
-  globalVar.lang = lang;
-  globalVar.date = {format: {year: "numeric", month: "2-digit", day: "2-digit"}, input: formatDate};   
-  globalVar.httpHeaders = undefined;
-  globalVar.params = undefined;
-}
+/**
+* set app global vars.
+*/
+function setGlobalParams() {
+  const scriptProps = PropertiesService.getScriptProperties();
+  const credential = loadCurrentCredential();
+  var formatDate = scriptProps.getProperty('FORMAT_DATE');
+  var lang = scriptProps.getProperty('LANG');
 
+  formatDate = formatDate? formatDate.toLowerCase().trim(): 'dd/mm/yyyy';  
+  lang = lang? lang.trim(): 'es-AR';
+
+  globalThis.globalVar = {};  
+  globalVar.date = {format: {year: "numeric", month: "2-digit", day: "2-digit"}, input: formatDate};       
+  globalVar.lang = lang;
+  if (credential) {
+    globalVar.urlBaseAgile = 'https://' + credential.domain + '.atlassian.net/rest/agile/1.0/';  
+    globalVar.urlBase = 'https://' + credential.domain + '.atlassian.net/rest/api/3/';
+    globalVar.domain = credential.domain;  
+    globalVar.token = credential.token;  
+  }        
+}

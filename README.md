@@ -21,23 +21,31 @@ step.
 
 ### 2. Configuration
 
+Visit [Apps Script] and open your Jira connector Apps Script project.
+Click on **File** -> **Project Properties** -> **Script Properties**.
+Add key-value pairs as script properties:
+
+   Key                   | Value
+   ----------------------|----------------------   
+    `FORMAT_DATE`        | {SHORT FORMAT DATE} (dd/mm/yyy, mm/dd/yy, yyyy.mm.dd, etc.)    
+    `LANG`               | {LANGUAGE} (es-AR, en-US, etc.)
+
+Default values are: dd/mm/yyyy and es-AR 
+
+### 2. Authentication
+
 The connector require authentication token. Follow the steps below to
 complete the connector setup:
 
 1.  Visit the https://<your-domain>.atlassian.net/jira/your-work.
+
 2.  In your Jira account, select the account management option. 
-    Then, in the security menu select the option **Create and manage API tokens**.
+    Then, in the security menu select the option **Create and manage API tokens**.   
+   
+3. Using the information obtained from Jira to Init authentication in your connector
 
-3. Visit [Apps Script] and open your Jira connector Apps Script project.
-   Click on **File** -> **Project Properties** -> **Script Properties**.
-   Using the information obtained from Jira API, add the following key-value
-   pairs as script properties:
+  ![](info/login.jpg)
 
-   Key                   | Value
-   ----------------------|----------------------
-    `DEFAULT_DOMAIN`     | {YOUR WORK DOMAIN} 
-    `FORMAT_DATE`        | {SHORT FORMAT DATE} (dd/mm/yyy, yyyy/mm/dd, yyyy.mm.dd, etc.)    
-    `LANG`               | {LANGUAGE} (es-AR, en-US, etc.)    
 
 ### About connector files
 
@@ -54,6 +62,7 @@ complete the connector setup:
 **data.gs** -> script that contains functions for data acquisition from the jira api
  
 **support.gs** -> general purpose functions
+
 
 ### Functions created in data studio with the connector data
 

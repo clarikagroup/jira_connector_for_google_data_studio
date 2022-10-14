@@ -1,20 +1,18 @@
-function getAuthType() {    
+function getAuthType() {      
   const cc = DataStudioApp.createCommunityConnector();  
   return cc.newAuthTypeResponse()
-    .setAuthType(cc.AuthType.USER_TOKEN)   
+    .setAuthType(cc.AuthType.PATH_USER_PASS)    
     .build();
 }
 
-function getConfig(request) {  
+function getConfig(request) {    
   return createConfig();
 }
 
-function getSchema(request) {  
+function getSchema(request) {      
   return createSchema(request);
 }
 
 function getData(request) {  
   return createData(request);
 }
-
-setGlobalVars();

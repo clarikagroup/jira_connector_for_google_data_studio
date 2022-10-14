@@ -1,21 +1,16 @@
-function createData(request) {
-  createParamsFromConfig(request); 
-  //get token from input user.
-  const token = loadCurrentUser();
-  //get jql sentence with params filters.
-  const jql = getJQL();    
-  //get custom attributes from domain.
-  const customAttrs = getCustomAttributes(token, jql);       
-  //get issues.
-  const issues = getIssues(token, jql, customAttrs);
-  //create response with connector format required.
-  const fields = this.getFields(); 
+function createData(request) {    
+  setGlobalParams();
+  
+  const params = createParamsFromConfig(request);   //get query params from request config.  
+  const jql = getJQL(params);                       //get jql sentence with params filters.  
+  const customAttrs = getCustomAttributes(jql);     //get custom attributes from domain.    
+  const issues = getIssues(jql, customAttrs);       //get issues.  
+  const fields = this.getFields();                  //create response with connector format required.
   const fieldIds = request.fields.map(function(field) {
     return field.name;
   });
-  const requestedSchema = fields.forIds(fieldIds);    
-  //transform response.
-  const requestedData = transform(token, requestedSchema, issues, customAttrs);      
+  const requestedSchema = fields.forIds(fieldIds);      
+  const requestedData = transform(requestedSchema, issues, customAttrs); //transform response.    
   
   return {
     schema: requestedSchema.build(),
@@ -27,7 +22,7 @@ function createData(request) {
 * transform list of issues in the response with connector format
 * @return {array}.
 */
-function transform(token, requestedSchema, issues, cAttrs) {
+function transform(requestedSchema, issues, cAttrs) {
   const schema = requestedSchema.asArray();
   var issuesInBackLog = undefined;
   var releases = [];  
@@ -49,7 +44,7 @@ function transform(token, requestedSchema, issues, cAttrs) {
         return item.key == project.key;
       });    
       if (!release) {
-        release = getReleaseProject(project, token);               
+        release = getReleaseProject(project);               
         releases.push(release);
       }
       project.releaseName = release.name;
@@ -60,7 +55,7 @@ function transform(token, requestedSchema, issues, cAttrs) {
     if (sprints && sprint) {  
       //add custom info to issue
       if (!issuesInBackLog) 
-        issuesInBackLog = getIssuesInBacklog(token, sprint.boardId);      
+        issuesInBackLog = getIssuesInBacklog(sprint.boardId);      
       issue.backlog = arrayContains(issuesInBackLog, issue.key);
       issue.extend = (sprints.length > 1)? true: false;
     } else {
@@ -174,8 +169,7 @@ function transform(token, requestedSchema, issues, cAttrs) {
 * Get JQL sentece, filter for created an project attributes from issue
 * @return {array}.
 */
-function getJQL() {
-  const params = globalVar.params;
+function getJQL(params) {  
   const dateEnd = new Date(params.dateEnd.getFullYear(), params.dateEnd.getMonth(), params.dateEnd.getDate() + 1);      
   const dateStart = params.dateStart;
   const projects = params.projects;
@@ -198,10 +192,10 @@ function getJQL() {
 * Get list of issues
 * @return {array}.
 */
-function getCustomAttributes(token, jql) {    
+function getCustomAttributes(jql) {    
   const rawResponse = UrlFetchApp.fetch(globalVar.urlBase + 'search', {
       method: 'POST',      
-      headers: {'Authorization': 'Basic ' + token, 'Content-Type': 'application/json'},
+      headers: {'Authorization': 'Basic ' + globalVar.token, 'Content-Type': 'application/json'},
       muteHttpExceptions: true,                          
       payload: JSON.stringify({
         "expand": ["names"],
@@ -236,11 +230,11 @@ function getCustomAttributes(token, jql) {
 * Get list of issues
 * @return {array}.
 */
-function getIssues(token, jql, cAttrs, offset) {  
+function getIssues(jql, cAttrs, offset) {  
   const startAt = (offset)? offset: 0;  
   const rawResponse = UrlFetchApp.fetch(globalVar.urlBase + 'search', {
       method: 'POST',      
-      headers: {'Authorization': 'Basic ' + token, 'Content-Type': 'application/json'},
+      headers: {'Authorization': 'Basic ' + globalVar.token, 'Content-Type': 'application/json'},
       muteHttpExceptions: true,                          
       payload: JSON.stringify({
         "expand": ["names", "versionedRepresentations", "changelog"],
@@ -259,7 +253,7 @@ function getIssues(token, jql, cAttrs, offset) {
     
     if (readedAt < (res.total - 1)) {
       //the answer is paginated
-      const next = getIssues(token, jql, cAttrs, readedAt + 1);      
+      const next = getIssues(jql, cAttrs, readedAt + 1);      
       return issues.concat(next);
     }    
     return issues;
@@ -271,10 +265,10 @@ function getIssues(token, jql, cAttrs, offset) {
 * Get data from the release project
 * @return {object}.
 */
-function getReleaseProject(project, token) {   
+function getReleaseProject(project) {   
   const rawResponse = UrlFetchApp.fetch(globalVar.urlBase + 'project/' + project.key, {
         method: 'GET',      
-        headers: {'Authorization': 'Basic ' + token, 'Content-Type': 'application/json'},
+        headers: {'Authorization': 'Basic ' + globalVar.token, 'Content-Type': 'application/json'},
         muteHttpExceptions: true
   });
   const httpCode = rawResponse.getResponseCode();    
@@ -307,11 +301,11 @@ function getReleaseProject(project, token) {
 * Get list of issues inside on backlog
 * @return {array} with key of issues in backlog.
 */
-function getIssuesInBacklog(token, boardId, offset) {      
+function getIssuesInBacklog(boardId, offset) {      
   const startAt = (offset)? offset: 0;  
   const rawResponse = UrlFetchApp.fetch(globalVar.urlBaseAgile + 'board/' + boardId + '/backlog?startAt=' + startAt, {
       method: 'GET',      
-      headers: {'Authorization': 'Basic ' + token, 'Content-Type': 'application/json'},
+      headers: {'Authorization': 'Basic ' + globalVar.token, 'Content-Type': 'application/json'},
       muteHttpExceptions: true
   });
   const httpCode = rawResponse.getResponseCode();
@@ -326,7 +320,7 @@ function getIssuesInBacklog(token, boardId, offset) {
     });  
     if (readedAt < (res.total - 1)) {
       //the answer is paginated
-      const next = getIssuesInBacklog(token, boardId, readedAt + 1);      
+      const next = getIssuesInBacklog(boardId, readedAt + 1);      
       result = result.concat(next);
     }
   } 

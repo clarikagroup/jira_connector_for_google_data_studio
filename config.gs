@@ -1,9 +1,10 @@
 function createConfig() {  
   const cc = DataStudioApp.createCommunityConnector();
-  const config = cc.getConfig();
-  const projects = getProjects(); 
+  const config = cc.getConfig();  
   const today = new Date();      
   const first = new Date(today.getFullYear(),0,1);  
+
+  setGlobalParams();
 
   config.newInfo()
   .setId('domain')
@@ -27,6 +28,7 @@ function createConfig() {
   .setPlaceholder(today.toLocaleDateString(globalVar.lang, globalVar.date.format))
   .setAllowOverride(false);
 
+  const projects = getProjects(); 
   const multiple = config.newSelectMultiple()
   .setId("projects")
   .setName("Projects")
@@ -45,11 +47,10 @@ function createConfig() {
 * get list of projects from domain.
 * @return {array} 
 */
-function getProjects() {
-  const token = loadCurrentUser();
+function getProjects() {    
   const rawResponse = UrlFetchApp.fetch(globalVar.urlBase + 'project', {
       method: 'GET',
-      headers: {'Authorization': 'Basic ' + token, 'Content-Type': 'application/json'},
+      headers: {'Authorization': 'Basic ' + globalVar.token, 'Content-Type': 'application/json'},
       muteHttpExceptions: true});
   
   const httpCode = rawResponse.getResponseCode();
@@ -60,47 +61,69 @@ function getProjects() {
   return [];
 }
 
+
 /**
 * Validate config parameteres.
-* @return {object} valid input parameters
+* @return {boolean} 
 */
-function createParamsFromConfig(request) {  
+function validateParamsFromConfig(request) {  
   if (request.configParams) {    
     const projects = request.configParams.projects? request.configParams.projects: "";
     
-    if (projects && projects.length > 0){                           
-      const today = new Date();        
-      var dateStart;
-      var dateEnd;
+    if (projects && projects.length > 0){                                 
+      var dateStart = undefined;
+      var dateEnd = undefined;
       
       if (request.configParams.dateStart) {
         dateStart = request.configParams.dateStart.toString().toDate(globalVar.date.input);
         if (isNaN(dateStart)) 
           throw ("Start date has incorrect format");
-      } else {        
-        dateStart = new Date(today.getFullYear(), 0, 1);      
-      }
+      } 
       
       if (request.configParams.dateEnd) {
         dateEnd = request.configParams.dateEnd.toString().toDate(globalVar.date.input);
         if (isNaN(dateEnd)) 
           throw ("End date has incorrect format");
-      } else {        
-        dateEnd = today;      
-      }
+      } 
       
       //the difference between start and end dates must not exceed two years (730 days)
-      const diffDays = Math.ceil((dateEnd - dateStart) / (1000 * 60 * 60 * 24));       
-      if (diffDays < 0 || dateStart > today || dateEnd > today) { 
-        throw ("Range of dates is incorrect");              
-      } else if (diffDays > 730) {
-        throw ("Range of dates is greater than 730 days");              
-      }
-      const params = {"projects": projects, "dateStart": dateStart, "dateEnd": dateEnd};
-      globalVar.params = params;   
-     
-      return;    
+      if (dateStart && dateEnd) {
+        const diffDays = Math.ceil((dateEnd - dateStart) / (1000 * 60 * 60 * 24));       
+        if (diffDays < 0 || dateStart > today || dateEnd > today) { 
+          throw ("Range of dates is incorrect");              
+        } else if (diffDays > 730) {
+          throw ("Range of dates is greater than 730 days");              
+        }            
+      } 
+      return;     
     } 
   }  
   throw ("projects are required");
 }
+
+/**
+* create query params from config parameteres.
+* @return {object} valid input parameters
+*/
+function createParamsFromConfig(request) {  
+  const projects = request.configParams.projects;
+  const today = new Date();        
+  var dateStart;
+  var dateEnd;
+    
+  if (request.configParams.dateStart)
+    dateStart = request.configParams.dateStart.toString().toDate(globalVar.date.input);    
+  else 
+    dateStart = new Date(today.getFullYear(), 0, 1);      
+    
+  if (request.configParams.dateEnd)
+    dateEnd = request.configParams.dateEnd.toString().toDate(globalVar.date.input);        
+  else
+    dateEnd = today;           
+  
+  return {"projects": projects, "dateStart": dateStart, "dateEnd": dateEnd};
+}
+
+
+
+

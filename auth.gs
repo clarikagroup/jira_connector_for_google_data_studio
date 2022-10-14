@@ -4,22 +4,29 @@
 function resetAuth() {
   const properties = PropertiesService.getUserProperties();  
   properties.deleteProperty('dscc.stoken');
+  properties.deleteProperty('dscc.domain');
 }
 
 /**
 * get current user (token) from cache.
 */
-function loadCurrentUser() {   
+function loadCurrentCredential() {   
   const properties = PropertiesService.getUserProperties();  
-  return properties.getProperty('dscc.stoken'); 
+  const domain = properties.getProperty('dscc.domain'); 
+  const token = properties.getProperty('dscc.stoken'); 
+
+  if ((domain && domain.length > 0) && (token && token.length > 0))
+    return {'domain': domain, 'token': token}; 
+  return undefined
 };
 
 /**
 * save current user in cache.
 */
-function saveCurrentUser(stoken) {  
+function saveCredential(domain, token) {  
   const properties = PropertiesService.getUserProperties();  
-  properties.setProperty('dscc.stoken', stoken);
+  properties.setProperty('dscc.domain', domain);
+  properties.setProperty('dscc.stoken', token);
 };
 
 /**
@@ -27,21 +34,26 @@ function saveCurrentUser(stoken) {
 * @return {boolean} True if the auth service has access.
 */
 function isAuthValid() {
-  const stoken = loadCurrentUser();   
-  return stoken && validateCredentials(stoken);
+  const credential = loadCurrentCredential();  
+
+  if (credential)    
+    return validateCredential(credential.domain, credential.token);        
+  return false;
 };
 
 
 /**
 * get username and password (token) from init form and validate.
 */
-function setCredentials(request) {   
-  const creds = request.userToken;  
-  const stoken = Utilities.base64Encode(creds.username + ':' + creds.token);
-  const isValid = validateCredentials(stoken);
+function setCredentials(request) {     
+  const reqDomain = request.pathUserPass.path;  
+  const reqUser = request.pathUserPass.username;  
+  const reqToken = request.pathUserPass.password;
+  const token = Utilities.base64Encode(reqUser + ':' + reqToken);
+  const isValid = validateCredential(reqDomain, token);
   
   if (isValid) {
-    saveCurrentUser(stoken);
+    saveCredential(reqDomain, token);
     return { errorCode: "NONE" };    
   } else {
     return { errorCode: "INVALID_CREDENTIALS" };
@@ -51,8 +63,8 @@ function setCredentials(request) {
 /**
 * validate user credentials.
 */
-function validateCredentials(token) {
-  const rawResponse = UrlFetchApp.fetch(globalVar.urlBase + 'myself', {
+function validateCredential(domain, token) {
+  const rawResponse = UrlFetchApp.fetch('https://' + domain + '.atlassian.net/rest/api/3/myself', {
       method: 'GET',
       headers: {'Authorization': 'Basic ' + token, 'Content-Type': 'application/json'},
       muteHttpExceptions: true});
@@ -68,5 +80,3 @@ function validateCredentials(token) {
 function isAdminUser() {
   return true;
 }
-
-
