@@ -37,7 +37,7 @@ Default values are: dd/mm/yyyy and es-AR
 The connector require authentication token. Follow the steps below to
 complete the connector setup:
 
-1.  Visit the https://your-domain.atlassian.net/jira/your-work.
+1.  Visit the https://(your-domain).atlassian.net/jira/your-work.
 
 2.  In your Jira account, select the account management option. 
     Then, in the security menu select the option **Create and manage API tokens**.   
