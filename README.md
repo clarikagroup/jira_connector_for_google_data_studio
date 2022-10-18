@@ -44,7 +44,7 @@ complete the connector setup:
    
 3. Using the information obtained from Jira to Init authentication in your connector
 
-  ![](info/login.jpg)
+  ![](info/login.jpg) 
 
 
 ### About connector files
