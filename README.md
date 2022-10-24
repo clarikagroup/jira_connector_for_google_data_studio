@@ -30,7 +30,7 @@ Add key-value pairs as script properties:
     `FORMAT_DATE`        | {SHORT FORMAT DATE} (dd/mm/yyy, mm/dd/yy, yyyy.mm.dd, etc.)    
     `LANG`               | {LANGUAGE} (es-AR, en-US, etc.)
 
-Default values are: dd/mm/yyyy and es-AR 
+The parameters are not requerided. Default values: dd/mm/yyyy and es-AR 
 
 ### 2. Authentication
 
