@@ -64,6 +64,16 @@ complete the connector setup:
 **support.gs** -> general purpose functions
 
 
+### Config and schema screen
+
+After the user is authenticated via jira token, the configuration screen is as follows
+
+ ![](info/config.jpg) 
+
+Once the configuration parameters have been entered, the following screen will appear describing the data dictionary
+
+ ![](info/schema.jpg) 
+
 ### Functions created in data studio with the connector data
 
 Deviation in days: DATE_DIFF(Sprint Complete,Sprint End) 
@@ -75,8 +85,6 @@ Finished points: if(State="UAT",Story Points,0), IF(State='Finalizada'and Extend
 Days without release: DATE_DIFF(TODAY(),Project Release Date)
  
 Days without time registration: DATE_DIFF(TODAY(),Tempo Date)
-
-
 
 [Data Studio]: https://datastudio.google.com
 [Community Connector]: https://developers.google.com/datastudio/connector
