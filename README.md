@@ -46,6 +46,8 @@ complete the connector setup:
 
   ![](info/login.jpg) 
 
+Path is the name of your domain (name only). Example, if your domain is https://mycompany.atlassian.net/jira, then you need to enter mycompany as the 'Path' parameter.
+The password is the token linked to your account.
 
 ### About connector files
 
